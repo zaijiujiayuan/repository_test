@@ -1,0 +1,153 @@
+# Drone Finder Configuration File
+# All system parameters can be adjusted here
+
+# ==============================================================================
+# HARDWARE CONFIGURATION
+# ==============================================================================
+hardware:
+  # RTL-SDR Device Configuration
+  sdr:
+    device_index: 0              # SDR device index (0 for first device)
+    sample_rate: 2400000         # Sample rate in Hz (2.4 MHz recommended)
+    center_frequency: 2400000000 # Center frequency in Hz (2.4 GHz for WiFi/drone bands)
+    gain: 40                      # RF gain in dB (0-50, auto if -1)
+    ppm: 0                        # Frequency offset in ppm (for calibration)
+    
+  # Antenna Configuration
+  antenna:
+    spacing_m: 0.06              # Antenna spacing in meters (lambda/2 for 2.4 GHz ≈ 6 cm)
+    type: "dipole"               # Antenna type: "dipole", "patch", "yagi"
+    switch_gpio: null            # GPIO pin for antenna switching (null = no switch)
+    
+  # GPS Module Configuration (optional)
+  gps:
+    enabled: false               # Enable GPS for position tagging
+    port: "/dev/ttyUSB0"         # Serial port (Linux/Mac) or "COM3" (Windows)
+    baudrate: 9600               # Serial baud rate
+    timeout: 2.0                 # Read timeout in seconds
+
+# ==============================================================================
+# SIGNAL PROCESSING CONFIGURATION
+# ==============================================================================
+signal_processing:
+  # Spectrum Analyzer Settings
+  spectrum:
+    fft_size: 2048               # FFT buffer size
+    overlap: 0.5                 # Window overlap ratio (0-1)
+    window_type: "hann"          # Window function: "hann", "hamming", "blackman"
+    noise_floor_db: -100         # Noise floor threshold in dB
+    peak_threshold_db: 10        # Peak detection threshold above noise floor
+    
+  # Phase Detector Settings
+  phase:
+    frequency_range: [2400, 2500] # Frequency range in MHz to scan
+    bandwidth: 10                # Channel bandwidth in MHz
+    coherent_int_time: 0.1       # Coherent integration time in seconds
+    
+  # Doppler Tracker Settings
+  doppler:
+    enabled: true                # Enable Doppler tracking
+    max_doppler_hz: 10000        # Maximum expected Doppler shift in Hz
+    tracking_gain: 0.1           # Kalman filter gain for Doppler
+
+# ==============================================================================
+# LOCALIZATION CONFIGURATION
+# ==============================================================================
+localization:
+  # Interferometry Method
+  interferometry:
+    enabled: true                # Use phase-based direction finding
+    wavelength_m: 0.125          # Wavelength in meters (3e8 / 2.4e9 ≈ 0.125 m)
+    
+  # Triangulation Method
+  triangulation:
+    enabled: true                # Use multi-point triangulation
+    min_observation_points: 2    # Minimum points for triangulation
+    max_points: 5                # Maximum points to use
+    
+  # Kalman Filter Settings
+  kalman_filter:
+    enabled: true                # Enable trajectory smoothing
+    process_noise: 0.1           # Process noise covariance
+    measurement_noise: 10.0      # Measurement noise covariance
+    
+  # Distance Estimation (RSSI-based)
+  rssi_distance:
+    tx_power_dbm: 10             # Assumed transmit power in dBm
+    reference_distance_m: 1.0    # Reference distance for RSSI calibration
+    reference_rssi: -40          # RSSI at reference distance in dBm
+    path_loss_exponent: 2.0      # Path loss exponent (2.0 = free space)
+
+# ==============================================================================
+# VISUALIZATION CONFIGURATION
+# ==============================================================================
+visualization:
+  # Radar Display Settings
+  radar:
+    max_range_m: 1000            # Maximum display range in meters
+    range_rings: 5               # Number of concentric range rings
+    beam_width_deg: 30           # Beam width for visualization
+    update_rate_hz: 10           # UI update frequency in Hz
+    
+  # Heatmap Settings
+  heatmap:
+    resolution_m: 50             # Heatmap cell resolution in meters
+    colormap: "viridis"          # Matplotlib colormap name
+    
+  # Map Viewer Settings
+  map:
+    center_lat: 0.0              # Default map center latitude
+    center_lon: 0.0              # Default map center longitude
+    zoom_level: 15               # Initial zoom level (1-19)
+
+# ==============================================================================
+# DATA STORAGE CONFIGURATION
+# ==============================================================================
+data:
+  # Directory paths
+  base_path: "./data"            # Base data directory
+  raw_data_path: "./data/raw"    # Raw IQ data storage
+  processed_path: "./data/processed" # Processed results
+  logs_path: "./data/logs"       # Log file directory
+  
+  # File naming and rotation
+  filename_format: "%Y-%m-%d_%H-%M-%S" # Timestamp format for filenames
+  max_raw_file_size_mb: 500      # Maximum raw IQ file size before rotation
+  retention_days: 30             # Keep data for N days (0 = unlimited)
+
+# ==============================================================================
+# LOGGING CONFIGURATION
+# ==============================================================================
+logging:
+  level: "INFO"                  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file_path: "./data/logs/drone_finder.log" # Log file path
+  max_file_size_mb: 10           # Maximum log file size before rotation
+  backup_count: 5                # Number of backup log files to keep
+  format: "[%(asctime)s] %(name)s - %(levelname)s - %(message)s"
+
+# ==============================================================================
+# PERFORMANCE TUNING
+# ==============================================================================
+performance:
+  # Multi-threading
+  num_workers: 4                 # Number of worker threads for processing
+  batch_size: 256                # Processing batch size (samples)
+  
+  # Memory management
+  max_iq_buffer_mb: 100          # Maximum IQ buffer size in MB
+  circular_buffer: true          # Use circular buffer for continuous operation
+
+# ==============================================================================
+# ADVANCED OPTIONS
+# ==============================================================================
+advanced:
+  # Calibration parameters
+  calibration:
+    iq_imbalance_correction: true # Correct SDR I/Q imbalance
+    dc_offset_correction: true    # Remove DC offset from samples
+    
+  # Debug and testing
+  debug_mode: false              # Enable debug output
+  save_raw_iq: true              # Save all raw IQ data to disk
+  replay_mode: false             # Replay mode (use pre-recorded IQ files)
+  replay_file: null              # Path to IQ file for replay
