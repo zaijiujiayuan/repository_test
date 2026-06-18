@@ -1,0 +1,8 @@
+sample_rate: 2000000
+fft_size: 4096
+noise_level: 0.2
+signals:
+  - freq: 100000
+    amplitude: 0.8
+  - freq: 250000
+    amplitude: 0.4
